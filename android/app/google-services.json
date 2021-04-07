@@ -1,0 +1,39 @@
+{
+  "project_info": {
+    "project_number": "123446386905",
+    "project_id": "continuee-it",
+    "storage_bucket": "continuee-it.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:123446386905:android:22cd8becf130fc82b51ec8",
+        "android_client_info": {
+          "package_name": "com.mariomenjr.continuee_mobile"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "123446386905-p8dik2f1ft2avnuqp9fecgmvaup8dbu9.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDPn7xCXn8nryJ1AjIDDACqJ31MBTsbZVg"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "123446386905-p8dik2f1ft2avnuqp9fecgmvaup8dbu9.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
