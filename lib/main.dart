@@ -1,77 +1,103 @@
 import 'package:flutter/material.dart';
+import 'package:http/http.dart' as http;
+
+// Import the firebase_core plugin
+import 'package:firebase_core/firebase_core.dart';
+import 'package:firebase_messaging/firebase_messaging.dart';
+
+Future<void> _firebaseMessagingBackgroundHandler(RemoteMessage message) async {
+  // If you're going to use other Firebase services in the background, such as Firestore,
+  // make sure you call `initializeApp` before using other Firebase services.
+  await Firebase.initializeApp();
+
+  print("Handling a background message: ${message.messageId}");
+}
 
 void main() {
-  runApp(MyApp());
-}
+  WidgetsFlutterBinding.ensureInitialized();
 
-class MyApp extends StatelessWidget {
-  // This widget is the root of your application.
-  @override
-  Widget build(BuildContext context) {
-    return MaterialApp(
-      title: 'Flutter Demo',
+  runApp(new MaterialApp(
+      title: 'Continuee',
       theme: ThemeData(
-        // This is the theme of your application.
-        //
-        // Try running your application with "flutter run". You'll see the
-        // application has a blue toolbar. Then, without quitting the app, try
-        // changing the primarySwatch below to Colors.green and then invoke
-        // "hot reload" (press "r" in the console where you ran "flutter run",
-        // or simply save your changes to "hot reload" in a Flutter IDE).
-        // Notice that the counter didn't reset back to zero; the application
-        // is not restarted.
-        primarySwatch: Colors.blue,
+        primarySwatch: Colors.amber,
       ),
-      home: MyHomePage(title: 'Flutter Demo Home Page'),
-    );
-  }
+      home: new MyApp()));
 }
 
-class MyHomePage extends StatefulWidget {
-  MyHomePage({Key key, this.title}) : super(key: key);
+class MyApp extends StatefulWidget {
+  _AppState createState() => _AppState();
+}
 
-  // This widget is the home page of your application. It is stateful, meaning
-  // that it has a State object (defined below) that contains fields that affect
-  // how it looks.
+class _AppState extends State<MyApp> {
+  // Set default `_initialized` and `_error` state to false
+  bool _initialized = false;
+  bool _error = false;
+  FirebaseMessaging _messaging;
 
-  // This class is the configuration for the state. It holds the values (in this
-  // case the title) provided by the parent (in this case the App widget) and
-  // used by the build method of the State. Fields in a Widget subclass are
-  // always marked "final".
+  // Define an async function to initialize FlutterFire
+  void initializeFlutterFire() async {
+    try {
+      FirebaseMessaging.onBackgroundMessage(
+          _firebaseMessagingBackgroundHandler);
+      FirebaseMessaging.onMessage.listen((RemoteMessage message) {
+        print('Got a message whilst in the foreground!');
+        print('Message data: ${message.data}');
 
-  final String title;
+        if (message.notification != null) {
+          showDialog(
+              context: context,
+              builder: (ctx) => AlertDialog(
+                    content: ListTile(
+                      title: Text('${message.notification.title}'),
+                      subtitle: Text('${message.notification.body}'),
+                    ),
+                    actions: <Widget>[
+                      FlatButton(
+                        child: Text('Ok'),
+                        onPressed: () => Navigator.of(context).pop(),
+                      ),
+                    ],
+                  ));
+        }
+      });
+
+      // Wait for Firebase to initialize and set `_initialized` state to true
+      await Firebase.initializeApp();
+      setState(() {
+        _initialized = true;
+      });
+      this._messaging = FirebaseMessaging.instance;
+    } catch (e) {
+      // Set `_error` state to true if Firebase initialization fails
+      setState(() {
+        _error = true;
+      });
+    }
+  }
 
   @override
-  _MyHomePageState createState() => _MyHomePageState();
-}
-
-class _MyHomePageState extends State<MyHomePage> {
-  int _counter = 0;
-
-  void _incrementCounter() {
-    setState(() {
-      // This call to setState tells the Flutter framework that something has
-      // changed in this State, which causes it to rerun the build method below
-      // so that the display can reflect the updated values. If we changed
-      // _counter without calling setState(), then the build method would not be
-      // called again, and so nothing would appear to happen.
-      _counter++;
-    });
+  void initState() {
+    initializeFlutterFire();
+    super.initState();
   }
 
   @override
   Widget build(BuildContext context) {
-    // This method is rerun every time setState is called, for instance as done
-    // by the _incrementCounter method above.
-    //
-    // The Flutter framework has been optimized to make rerunning build methods
-    // fast, so that you can just rebuild anything that needs updating rather
-    // than having to individually change instances of widgets.
+    // // Show error message if initialization failed
+    if (_error) {
+      print("Error $_error");
+    }
+
+    // // Show a loader until FlutterFire is initialized
+    if (!_initialized) {
+      print("Loading...");
+    }
+
     return Scaffold(
       appBar: AppBar(
         // Here we take the value from the MyHomePage object that was created by
         // the App.build method, and use it to set our appbar title.
-        title: Text(widget.title),
+        title: Text("Continuee"),
       ),
       body: Center(
         // Center is a layout widget. It takes a single child and positions it
@@ -93,21 +119,19 @@ class _MyHomePageState extends State<MyHomePage> {
           // horizontal).
           mainAxisAlignment: MainAxisAlignment.center,
           children: <Widget>[
-            Text(
-              'You have pushed the button this many times:',
-            ),
-            Text(
-              '$_counter',
-              style: Theme.of(context).textTheme.headline4,
-            ),
+            TextButton(
+                onPressed: () {
+                  this._messaging.getToken().then((token) => http
+                      .get(Uri.parse(
+                          "http://10.0.2.2:3010/firebase/share?registrationToken=$token"))
+                      // "http://192.168.0:3010/send-to-device?registrationToken=$token"))
+                      // "https://continuee.mariomenjr.com/firebase/share?registrationToken=$token"))
+                      .then((json) => print("Data: $json")));
+                },
+                child: Text("Share link"))
           ],
         ),
       ),
-      floatingActionButton: FloatingActionButton(
-        onPressed: _incrementCounter,
-        tooltip: 'Increment',
-        child: Icon(Icons.add),
-      ), // This trailing comma makes auto-formatting nicer for build methods.
     );
   }
 }
