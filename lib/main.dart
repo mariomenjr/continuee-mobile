@@ -1,3 +1,4 @@
+import 'package:continuee_mobile/utils/api.dart';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'package:flutter_dotenv/flutter_dotenv.dart' as dotenv;
@@ -26,13 +27,11 @@ class _AppState extends State<MyApp> {
   bool _initialized = false;
   bool _error = false;
 
-  Messaging _messaging;
+  Messaging _messaging = Messaging();
 
   // Define an async function to initialize FlutterFire
   void initializeFirebase() async {
-    try {
-      this._messaging = Messaging();
-    } catch (e) {
+    try {} catch (e) {
       // Set `_error` state to true if Firebase initialization fails
       setState(() {
         _error = true;
@@ -69,11 +68,10 @@ class _AppState extends State<MyApp> {
           children: <Widget>[
             TextButton(
                 onPressed: () {
-                  this._messaging.fcm.getToken().then((token) {
-                    var uri =
-                        "${dotenv.env["continuee-server"]}/firebase/share?registrationToken=$token";
-                    return http.get(Uri.parse(uri)).then(
-                        (json) => print("continuee-server: ${json.body}"));
+                  this._messaging.fcm?.getToken().then((token) {
+                    return Api()
+                        .get("firebase/share?registrationToken=$token")
+                        .then((r) => print("continuee-server: ${r.data}"));
                   });
                 },
                 child: Text("Share"))

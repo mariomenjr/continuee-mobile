@@ -1,10 +1,11 @@
-import 'package:http/http.dart' as http;
+import 'dart:io';
 import 'package:device_info/device_info.dart';
-import 'package:flutter_dotenv/flutter_dotenv.dart' as dotenv;
-
-// Import the firebase_core plugin
 import 'package:firebase_core/firebase_core.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
+
+import 'package:continuee_mobile/models/Device.dart';
+import 'package:continuee_mobile/models/DevicePlatform.dart';
+import 'package:continuee_mobile/utils/api.dart';
 
 Future<void> _firebaseMessagingBackgroundHandler(RemoteMessage message) async {
   // If you're going to use other Firebase services in the background, such as Firestore,
@@ -15,7 +16,7 @@ Future<void> _firebaseMessagingBackgroundHandler(RemoteMessage message) async {
 }
 
 class Messaging {
-  static Messaging _instance;
+  static Messaging? _instance;
 
   Messaging._internal() {
     this.initializeConnection();
@@ -24,11 +25,9 @@ class Messaging {
 
   factory Messaging() => _instance ?? Messaging._internal();
 
-  FirebaseMessaging fcm;
+  FirebaseMessaging? fcm;
 
   void initializeConnection() async {
-    print(dotenv.env["continuee-server"]);
-
     await this.initializeFirebase();
     await this.initializeContinuee();
   }
@@ -39,7 +38,7 @@ class Messaging {
           _firebaseMessagingBackgroundHandler);
       FirebaseMessaging.onMessage.listen((RemoteMessage message) {
         if (message.notification != null) {
-          print('${message.notification.title}');
+          print('${message.notification?.title}');
           // TODO: Show an alert (by a callback?)
           // showDialog(
           //     context: context,
@@ -65,16 +64,16 @@ class Messaging {
 
   Future initializeContinuee() async {
     var device = await DeviceInfoPlugin().androidInfo;
-    var token = await this.fcm.getToken();
-    var resp = await http.post(
-        Uri.parse("${dotenv.env["continuee-server"]}/device/identify"),
-        body: {
-          'uid': device.androidId,
-          'manufacturer': device.manufacturer,
-          'brand': device.model,
-          'registrationToken': token
-        });
+    var token = await this.fcm?.getToken();
 
-    print(resp.body);
+    var resp = await Api().post("device/identify",
+        data: new Device(
+            device.androidId,
+            device.manufacturer,
+            device.model,
+            token.toString(),
+            new DevicePlatform(
+                Platform.operatingSystem, Platform.operatingSystemVersion)));
+    print(Device.fromJson(resp.data));
   }
 }
