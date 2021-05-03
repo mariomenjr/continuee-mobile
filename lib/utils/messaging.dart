@@ -1,10 +1,7 @@
-import 'dart:io';
-import 'package:device_info/device_info.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
 
-import 'package:continuee_mobile/models/Device.dart';
-import 'package:continuee_mobile/models/DevicePlatform.dart';
+import 'package:continuee_mobile/extensions/Device.extension.dart';
 import 'package:continuee_mobile/utils/api.dart';
 
 Future<void> _firebaseMessagingBackgroundHandler(RemoteMessage message) async {
@@ -18,19 +15,19 @@ Future<void> _firebaseMessagingBackgroundHandler(RemoteMessage message) async {
 class Messaging {
   static Messaging? _instance;
 
-  Messaging._internal() {
-    this.initializeConnection();
+  factory Messaging() => _instance ?? Messaging._();
+
+  Messaging._() {
+    this.initialize();
     _instance = this;
   }
 
-  factory Messaging() => _instance ?? Messaging._internal();
-
-  FirebaseMessaging? fcm;
-
-  void initializeConnection() async {
+  void initialize() async {
     await this.initializeFirebase();
     await this.initializeContinuee();
   }
+
+  FirebaseMessaging? fcm;
 
   Future initializeFirebase() async {
     try {
@@ -63,17 +60,10 @@ class Messaging {
   }
 
   Future initializeContinuee() async {
-    var device = await DeviceInfoPlugin().androidInfo;
-    var token = await this.fcm?.getToken();
+    var resp = await Api()
+        .post("device/identify", data: await DeviceFactory.getLocal());
+    print(resp.data);
 
-    var resp = await Api().post("device/identify",
-        data: new Device(
-            device.androidId,
-            device.manufacturer,
-            device.model,
-            token.toString(),
-            new DevicePlatform(
-                Platform.operatingSystem, Platform.operatingSystemVersion)));
-    print(Device.fromJson(resp.data));
+    // TODO: What will happen if it fails?
   }
 }
