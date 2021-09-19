@@ -1,5 +1,5 @@
 import 'package:continuee_mobile/extensions/Device.extension.dart';
-import 'package:continuee_mobile/pages/ConfirmWords.dart';
+import 'package:continuee_mobile/pages/ConfirmSyncCode.dart';
 import 'package:continuee_mobile/utils/api.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart' as dotenv;
@@ -73,7 +73,7 @@ class _AppState extends State<MyApp> {
                   var r = await Api().post("chain/createSync");
 
                   Navigator.push(context,
-                      MaterialPageRoute(builder: (ctx) => ConfirmWords()));
+                      MaterialPageRoute(builder: (ctx) => ConfirmSyncCode()));
 
                   // TODO: Show user the words and the noise
                   // TODO: Get the user to confirm the noise
@@ -85,7 +85,7 @@ class _AppState extends State<MyApp> {
 
                   print("${r.data}");
                 },
-                child: Text("Create Chain")),
+                child: Text("Create Sync Chain")),
             TextButton(
                 onPressed: () async {
                   var device = await DeviceFactory.getLocal();
@@ -101,7 +101,7 @@ class _AppState extends State<MyApp> {
                       .get("firebase/share?registrationToken=$token");
                   print("continuee-server: ${r.data}");
                 },
-                child: Text("Share"))
+                child: Text("Try Share"))
           ],
         ),
       ),
