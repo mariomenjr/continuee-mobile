@@ -72,8 +72,13 @@ class _AppState extends State<MyApp> {
                   // var device = await DeviceFactory.getLocal();
                   var r = await Api().post("chain/createSync");
 
-                  Navigator.push(context,
-                      MaterialPageRoute(builder: (ctx) => ConfirmSyncCode()));
+                  Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                          builder: (ctx) => ConfirmSyncCode(
+                                syncCode: "${r.data["words"]}",
+                                chainName: "${r.data["name"]}",
+                              )));
 
                   // TODO: Show user the words and the noise
                   // TODO: Get the user to confirm the noise
