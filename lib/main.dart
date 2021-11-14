@@ -1,5 +1,5 @@
 import 'package:continuee_mobile/extensions/Device.extension.dart';
-import 'package:continuee_mobile/pages/ConfirmSyncCode.dart';
+import 'package:continuee_mobile/pages/CreateChain.dart';
 import 'package:continuee_mobile/utils/api.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart' as dotenv;
@@ -69,26 +69,18 @@ class _AppState extends State<MyApp> {
           children: <Widget>[
             TextButton(
                 onPressed: () async {
-                  // var device = await DeviceFactory.getLocal();
-                  var r = await Api().post("chain/createSync");
+                  var r = await Api().get("chain/generateSync");
+                  print("chain/generateSync: ${r.data}");
+                  // TODO: Consider encrypting r.data.sync or, even better..., all r.data.
+                  // TODO: Catch possible errors
 
                   Navigator.push(
                       context,
                       MaterialPageRoute(
-                          builder: (ctx) => ConfirmSyncCode(
-                                syncCode: "${r.data["words"]}",
+                          builder: (ctx) => CreateChain(
+                                syncCode: "${r.data["sync"]}",
                                 chainName: "${r.data["name"]}",
                               )));
-
-                  // TODO: Show user the words and the noise
-                  // TODO: Get the user to confirm the noise
-                  // TODO: Once confirmed, SHA de words and send them to Server
-                  //       By calling chain/create
-
-                  // var s = await Api().post("chain/createChain",
-                  //     data: {"device": device, "words": r.data["words"]});
-
-                  print("${r.data}");
                 },
                 child: Text("Create Sync Chain")),
             TextButton(

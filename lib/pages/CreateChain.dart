@@ -1,20 +1,21 @@
+import 'package:continuee_mobile/extensions/Device.extension.dart';
+import 'package:continuee_mobile/utils/api.dart';
 import 'package:continuee_mobile/utils/conditionals.dart';
 import 'package:flutter/material.dart';
 import 'package:qr_flutter/qr_flutter.dart';
 
-class ConfirmSyncCode extends StatefulWidget {
-  const ConfirmSyncCode(
-      {Key? key, required this.syncCode, required this.chainName})
+class CreateChain extends StatefulWidget {
+  const CreateChain({Key? key, required this.syncCode, required this.chainName})
       : super(key: key);
 
   final String syncCode;
   final String chainName;
 
   @override
-  State<ConfirmSyncCode> createState() => _ConfirmSyncCodeState();
+  State<CreateChain> createState() => _CreateChainState();
 }
 
-class _ConfirmSyncCodeState extends State<ConfirmSyncCode> {
+class _CreateChainState extends State<CreateChain> {
   final _formKey = GlobalKey<FormState>();
 
   bool _isResetEnabled = false;
@@ -81,11 +82,21 @@ class _ConfirmSyncCodeState extends State<ConfirmSyncCode> {
                                 children: [
                                   FlatButton(
                                     textTheme: ButtonTextTheme.primary,
-                                    onPressed: () {
+                                    onPressed: () async {
                                       if (this
                                           ._formKey
                                           .currentState!
                                           .validate()) {
+                                        var device =
+                                            await DeviceFactory.getLocal();
+                                        var r = await Api()
+                                            .post("chain/createChain", data: {
+                                          "device": device,
+                                          "sync": widget.syncCode,
+                                          "name": widget.chainName
+                                        });
+                                        // TODO: Catch possible errors
+
                                         Navigator.pop(context);
                                       }
                                     },
