@@ -1,20 +1,24 @@
+import 'package:continuee_mobile/pages/CreateChain.dart';
+import 'package:continuee_mobile/pages/ScanSync.dart';
+import 'package:continuee_mobile/utils/api.dart';
+import 'package:continuee_mobile/utils/store.dart';
 import 'package:flutter/material.dart';
-import 'package:http/http.dart' as http;
+import 'package:flutter_dotenv/flutter_dotenv.dart' as dotenv;
 
-// Import the firebase_core plugin
-import 'package:firebase_core/firebase_core.dart';
-import 'package:firebase_messaging/firebase_messaging.dart';
+import 'package:continuee_mobile/utils/messaging.dart';
 
-Future<void> _firebaseMessagingBackgroundHandler(RemoteMessage message) async {
-  // If you're going to use other Firebase services in the background, such as Firestore,
-  // make sure you call `initializeApp` before using other Firebase services.
-  await Firebase.initializeApp();
-
-  print("Handling a background message: ${message.messageId}");
-}
-
-void main() {
+Future main() async {
   WidgetsFlutterBinding.ensureInitialized();
+
+  // TODO: This way I can simulate a persisted session based on ChainId
+  //       Should I also save the deviceId
+  var chainId = await Store.getChainId();
+  if (chainId != null)
+    print("ChainId: ${chainId}");
+  else
+    print("No chain persisted.");
+
+  await dotenv.load();
 
   runApp(new MaterialApp(
       title: 'Continuee',
@@ -32,42 +36,12 @@ class _AppState extends State<MyApp> {
   // Set default `_initialized` and `_error` state to false
   bool _initialized = false;
   bool _error = false;
-  FirebaseMessaging _messaging;
+
+  Messaging _messaging = Messaging();
 
   // Define an async function to initialize FlutterFire
-  void initializeFlutterFire() async {
-    try {
-      FirebaseMessaging.onBackgroundMessage(
-          _firebaseMessagingBackgroundHandler);
-      FirebaseMessaging.onMessage.listen((RemoteMessage message) {
-        print('Got a message whilst in the foreground!');
-        print('Message data: ${message.data}');
-
-        if (message.notification != null) {
-          showDialog(
-              context: context,
-              builder: (ctx) => AlertDialog(
-                    content: ListTile(
-                      title: Text('${message.notification.title}'),
-                      subtitle: Text('${message.notification.body}'),
-                    ),
-                    actions: <Widget>[
-                      FlatButton(
-                        child: Text('Ok'),
-                        onPressed: () => Navigator.of(context).pop(),
-                      ),
-                    ],
-                  ));
-        }
-      });
-
-      // Wait for Firebase to initialize and set `_initialized` state to true
-      await Firebase.initializeApp();
-      setState(() {
-        _initialized = true;
-      });
-      this._messaging = FirebaseMessaging.instance;
-    } catch (e) {
+  void initializeFirebase() async {
+    try {} catch (e) {
       // Set `_error` state to true if Firebase initialization fails
       setState(() {
         _error = true;
@@ -77,7 +51,8 @@ class _AppState extends State<MyApp> {
 
   @override
   void initState() {
-    initializeFlutterFire();
+    initializeFirebase();
+
     super.initState();
   }
 
@@ -95,40 +70,46 @@ class _AppState extends State<MyApp> {
 
     return Scaffold(
       appBar: AppBar(
-        // Here we take the value from the MyHomePage object that was created by
-        // the App.build method, and use it to set our appbar title.
         title: Text("Continuee"),
       ),
       body: Center(
-        // Center is a layout widget. It takes a single child and positions it
-        // in the middle of the parent.
         child: Column(
-          // Column is also a layout widget. It takes a list of children and
-          // arranges them vertically. By default, it sizes itself to fit its
-          // children horizontally, and tries to be as tall as its parent.
-          //
-          // Invoke "debug painting" (press "p" in the console, choose the
-          // "Toggle Debug Paint" action from the Flutter Inspector in Android
-          // Studio, or the "Toggle Debug Paint" command in Visual Studio Code)
-          // to see the wireframe for each widget.
-          //
-          // Column has various properties to control how it sizes itself and
-          // how it positions its children. Here we use mainAxisAlignment to
-          // center the children vertically; the main axis here is the vertical
-          // axis because Columns are vertical (the cross axis would be
-          // horizontal).
           mainAxisAlignment: MainAxisAlignment.center,
           children: <Widget>[
             TextButton(
-                onPressed: () {
-                  this._messaging.getToken().then((token) => http
-                      .get(Uri.parse(
-                          "http://10.0.2.2:3010/firebase/share?registrationToken=$token"))
-                      // "http://192.168.0:3010/send-to-device?registrationToken=$token"))
-                      // "https://continuee.mariomenjr.com/firebase/share?registrationToken=$token"))
-                      .then((json) => print("Data: $json")));
+                onPressed: () async {
+                  var r = await Api().get("chain/generateSync");
+                  print("chain/generateSync: ${r.data}");
+                  // TODO: Consider encrypting r.data.sync or, even better..., all r.data.
+                  // TODO: Catch possible errors
+
+                  Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                          builder: (ctx) => CreateChain(
+                                syncCode: "${r.data["sync"]}",
+                                chainName: "${r.data["name"]}",
+                              )));
                 },
-                child: Text("Share link"))
+                child: Text("Create Sync Chain")),
+            TextButton(
+                onPressed: () async {
+                  // var device = await DeviceFactory.getLocal();
+                  // var r = await Api().put("chain/joinChain",
+                  //     data: {"deviceUid": "${device.uid}"});
+                  // print("chain/joinChain: ${r.data}");
+                  Navigator.push(
+                      context, MaterialPageRoute(builder: (ctx) => ScanSync()));
+                },
+                child: Text("Join Chain")),
+            TextButton(
+                onPressed: () async {
+                  var token = await this._messaging.fcm?.getToken();
+                  var r = await Api()
+                      .get("firebase/share?registrationToken=$token");
+                  print("continuee-server: ${r.data}");
+                },
+                child: Text("Try Share"))
           ],
         ),
       ),
