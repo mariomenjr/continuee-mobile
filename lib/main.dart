@@ -1,6 +1,6 @@
 import 'package:continuee_mobile/extensions/Device.extension.dart';
 import 'package:continuee_mobile/pages/CreateChain.dart';
-import 'package:continuee_mobile/pages/JoinChain.dart';
+import 'package:continuee_mobile/pages/ScanSync.dart';
 import 'package:continuee_mobile/utils/api.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart' as dotenv;
@@ -86,12 +86,12 @@ class _AppState extends State<MyApp> {
                 child: Text("Create Sync Chain")),
             TextButton(
                 onPressed: () async {
-                  var device = await DeviceFactory.getLocal();
-                  var r = await Api().put("chain/joinChain",
-                      data: {"deviceUid": "${device.uid}"});
-
-                  Navigator.push(context,
-                      MaterialPageRoute(builder: (ctx) => JoinChain()));
+                  // var device = await DeviceFactory.getLocal();
+                  // var r = await Api().put("chain/joinChain",
+                  //     data: {"deviceUid": "${device.uid}"});
+                  // print("chain/joinChain: ${r.data}");
+                  Navigator.push(
+                      context, MaterialPageRoute(builder: (ctx) => ScanSync()));
                 },
                 child: Text("Join Chain")),
             TextButton(
