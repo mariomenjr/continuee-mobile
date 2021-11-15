@@ -1,16 +1,23 @@
-# continuee_mobile
+# Continuee Mobile
 
-A new Flutter project.
+Continuee will allow you to share links between your registered devices leveraging Firebase platform.
 
-## Getting Started
+## Why?
 
-This project is a starting point for a Flutter application.
+For fun, and to learn Flutter! 
 
-A few resources to get you started if this is your first Flutter project:
+I think there should be an easier way to share links among your own devices other than sending them through a messaging application, or relaying on the history features (i.e. YouTube).
 
-- [Lab: Write your first Flutter app](https://flutter.dev/docs/get-started/codelab)
-- [Cookbook: Useful Flutter samples](https://flutter.dev/docs/cookbook)
+## When?
 
-For help getting started with Flutter, view our
-[online documentation](https://flutter.dev/docs), which offers tutorials,
-samples, guidance on mobile development, and a full API reference.
+I am trying to get a working prototype completed by January 2022. You should take a look at the [server app](https://github.com/mariomenjr/continuee-server), it's made with Typescript.
+
+## How?
+
+Docker, Typescript, Flutter, and some time of my weekends! (you also may join if you like!).
+
+## Me?
+
+- w: https://mariomenjr.com
+- t: https://twitter.com/mariomenjr
+- l: https://linkedin.com/in/mariomenjr
