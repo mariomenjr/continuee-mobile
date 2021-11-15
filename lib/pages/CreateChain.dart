@@ -1,9 +1,11 @@
+import 'package:continuee_mobile/utils/store.dart';
+import 'package:flutter/material.dart';
+import 'package:qr_flutter/qr_flutter.dart';
+
 import 'package:continuee_mobile/extensions/Device.extension.dart';
 import 'package:continuee_mobile/pages/PageLayout.dart';
 import 'package:continuee_mobile/utils/api.dart';
 import 'package:continuee_mobile/utils/conditionals.dart';
-import 'package:flutter/material.dart';
-import 'package:qr_flutter/qr_flutter.dart';
 
 class CreateChain extends StatefulWidget {
   const CreateChain({Key? key, required this.syncCode, required this.chainName})
@@ -71,6 +73,8 @@ class _CreateChainState extends State<CreateChain> {
                             "name": widget.chainName
                           });
                           // TODO: Catch possible errors
+
+                          Store.setChainId(r.data["chainId"]);
 
                           Navigator.pop(context);
                         }

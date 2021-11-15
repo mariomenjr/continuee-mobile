@@ -2,6 +2,7 @@ import 'dart:io';
 
 import 'package:continuee_mobile/extensions/Device.extension.dart';
 import 'package:continuee_mobile/utils/api.dart';
+import 'package:continuee_mobile/utils/store.dart';
 import 'package:flutter/material.dart';
 import 'package:qr_code_scanner/qr_code_scanner.dart';
 
@@ -52,6 +53,7 @@ class _ScanSyncState extends State<ScanSync> {
       });
 
       print("chain/joinChain: ${r.data}");
+      Store.setChainId(r.data["chainId"]);
 
       Navigator.pop(this.context);
 

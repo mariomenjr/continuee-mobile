@@ -1,7 +1,7 @@
-import 'package:continuee_mobile/extensions/Device.extension.dart';
 import 'package:continuee_mobile/pages/CreateChain.dart';
 import 'package:continuee_mobile/pages/ScanSync.dart';
 import 'package:continuee_mobile/utils/api.dart';
+import 'package:continuee_mobile/utils/store.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart' as dotenv;
 
@@ -9,6 +9,14 @@ import 'package:continuee_mobile/utils/messaging.dart';
 
 Future main() async {
   WidgetsFlutterBinding.ensureInitialized();
+
+  // TODO: This way I can simulate a persisted session based on ChainId
+  //       Should I also save the deviceId
+  var chainId = await Store.getChainId();
+  if (chainId != null)
+    print("ChainId: ${chainId}");
+  else
+    print("No chain persisted.");
 
   await dotenv.load();
 
